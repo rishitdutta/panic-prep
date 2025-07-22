@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { promptSchema } from "@/lib/validator";
+import { redirect } from "next/navigation";
 
 export interface ServerResult {
   success: boolean;
@@ -40,9 +41,5 @@ export async function handleSubmit(
   } */
 
   //dummy return
-  return {
-    success: true,
-    message: "Form submitted successfully",
-    submittedValue: validPrompt,
-  };
+  redirect("/video-structure");
 }

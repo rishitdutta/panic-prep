@@ -29,12 +29,12 @@ function PromptPage() {
           <Label htmlFor="textBox">Enter Topics:</Label>
           <Textarea
             id="textBox"
-            className=""
+            className="min-h-[100px] max-h-[400px]"
             name="prompt"
             placeholder="Type your list of topics here..."
           />
         </div>
-        <Button type="submit" className="" variant="outline" size="lg">
+        <Button type="submit" className="max-w-24" variant="outline" size="lg">
           Submit
         </Button>
       </Form>
