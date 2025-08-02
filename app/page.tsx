@@ -82,7 +82,7 @@ export default function Home() {
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {/* Upload Option */}
           <Link href="/upload">
-            <div className="group relative overflow-hidden rounded-xl border bg-background p-8 shadow-sm transition-all hover:shadow-lg hover:scale-[1.02]">
+            <div className="group h-full relative overflow-hidden rounded-xl border bg-background p-8 shadow-sm transition-all hover:shadow-lg hover:scale-[1.02]">
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="rounded-full bg-primary/10 p-4 group-hover:bg-primary/20 transition-colors">
                   <Upload className="h-8 w-8 text-primary" />
@@ -103,7 +103,7 @@ export default function Home() {
 
           {/* Prompt Option */}
           <Link href="/prompt">
-            <div className="group relative overflow-hidden rounded-xl border bg-background p-8 shadow-sm transition-all hover:shadow-lg hover:scale-[1.02]">
+            <div className="group h-full relative overflow-hidden rounded-xl border bg-background p-8 shadow-sm transition-all hover:shadow-lg hover:scale-[1.02]">
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="rounded-full bg-primary/10 p-4 group-hover:bg-primary/20 transition-colors">
                   <Edit3 className="h-8 w-8 text-primary" />
