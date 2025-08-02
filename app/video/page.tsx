@@ -66,6 +66,11 @@ function VideoPage() {
 
   const activeSlide = slides[currentSlide];
 
+  //TODO: Add full screen option
+  //TODO: Add auto slide navigation after audio playback
+  //TODO: Add speed control for audio playback
+  //TODO: \pause breaks the audio slide pairs, fix it
+
   return (
     <div className="flex flex-col items-center justify-center h-screen w-screen p-4 sm:p-8">
       {/* Preload the next slide's image for a smoother transition */}
