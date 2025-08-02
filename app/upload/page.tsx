@@ -5,93 +5,141 @@ import {
   FileUploadDropzone,
   FileUploadItem,
   FileUploadItemDelete,
-  FileUploadItemMetadata,
-  FileUploadItemPreview,
-  FileUploadItemProgress,
   FileUploadList,
   FileUploadTrigger,
 } from "@/components/ui/file-upload";
-import { Upload, X } from "lucide-react";
+import { Loader2, Upload, X } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 function UploadPage() {
   const [files, setFiles] = React.useState<File[]>([]);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const router = useRouter();
+  const supabase = createClient();
 
-  const onUpload = React.useCallback(
-    async (
-      files: File[],
-      {
-        onProgress,
-        onSuccess,
-        onError,
-      }: {
-        onProgress: (file: File, progress: number) => void;
-        onSuccess: (file: File) => void;
-        onError: (file: File, error: Error) => void;
+  React.useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        router.push("/login");
       }
-    ) => {
-      try {
-        // Process each file individually
-        const uploadPromises = files.map(async (file) => {
-          try {
-            // Simulate file upload with progress
-            const totalChunks = 10;
-            let uploadedChunks = 0;
+    };
+    checkSession();
+  }, [supabase, router]);
 
-            // Simulate chunk upload with delays
-            for (let i = 0; i < totalChunks; i++) {
-              // Simulate network delay (100-300ms per chunk)
-              await new Promise((resolve) =>
-                setTimeout(resolve, Math.random() * 200 + 100)
-              );
+  const handleProcessClick = async () => {
+    if (files.length === 0) {
+      toast.error("Please select at least one file to process.");
+      return;
+    }
 
-              // Update progress for this specific file
-              uploadedChunks++;
-              const progress = (uploadedChunks / totalChunks) * 100;
-              onProgress(file, progress);
-            }
+    setIsLoading(true);
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (!apiUrl) {
+      toast.error("Client-side error: API URL is missing.");
+      setIsLoading(false);
+      return;
+    }
 
-            // Simulate server processing delay
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            onSuccess(file);
-          } catch (error) {
-            onError(
-              file,
-              error instanceof Error ? error : new Error("Upload failed")
-            );
-          }
-        });
-
-        // Wait for all uploads to complete
-        await Promise.all(uploadPromises);
-      } catch (error) {
-        // This handles any error that might occur outside the individual upload processes
-        console.error("Unexpected error during upload:", error);
+    try {
+      // --- Get Auth Token ---
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error("Authentication error. Please log in again.");
       }
-    },
-    []
-  );
+      const authToken = session.access_token;
+      const authHeader = { Authorization: `Bearer ${authToken}` };
+
+      // --- Step 1: Upload Files ---
+      toast.info("Step 1 of 3: Uploading files...");
+      const formData = new FormData();
+      files.forEach((file) => formData.append("files", file));
+      const uploadResponse = await fetch(
+        `${apiUrl}/presentation/upload_materials`,
+        { method: "POST", headers: authHeader, body: formData }
+      );
+      if (!uploadResponse.ok) throw new Error("File upload failed.");
+      const { material_keys } = await uploadResponse.json();
+
+      // --- Step 2: Analyze Materials ---
+      toast.info("Step 2 of 3: Analyzing materials...");
+      const analyzeResponse = await fetch(
+        `${apiUrl}/presentation/analyze_materials`,
+        {
+          method: "POST",
+          headers: { ...authHeader, "Content-Type": "application/json" },
+          body: JSON.stringify({ material_keys }),
+        }
+      );
+      if (!analyzeResponse.ok) throw new Error("Material analysis failed.");
+      const { job_id, outline } = await analyzeResponse.json();
+
+      // --- Step 3: Build Presentation ---
+      toast.info("Step 3 of 3: Generating presentation...");
+      const buildResponse = await fetch(
+        `${apiUrl}/presentation/build_presentation`,
+        {
+          method: "POST",
+          headers: { ...authHeader, "Content-Type": "application/json" },
+          body: JSON.stringify({ job_id, outline, voice: "af_heart" }),
+        }
+      );
+      if (!buildResponse.ok) throw new Error("Presentation generation failed.");
+      const presentationResult = await buildResponse.json();
+
+      // --- Final Step: Navigate to Video ---
+      toast.success("Presentation ready!");
+      localStorage.setItem("videoData", JSON.stringify(presentationResult));
+      router.push("/video");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error("An error occurred", { description: errorMessage });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const onFileReject = React.useCallback((file: File, message: string) => {
-    toast(message, {
+    toast.error(message, {
       description: `"${
         file.name.length > 20 ? `${file.name.slice(0, 20)}...` : file.name
-      }" has been rejected`,
+      }" was rejected.`,
     });
   }, []);
 
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <Loader2 className="h-12 w-12 animate-spin" />
+        <h1 className="text-2xl font-semibold">Processing your request...</h1>
+        <p className="text-muted-foreground">This may take a few moments.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      Upload Files Here
+    <div className="flex flex-col items-center justify-center min-h-screen p-8 pb-20 gap-8 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold">Upload Your Materials</h1>
+        <p className="text-muted-foreground mt-2">
+          Select your files and we'll handle the rest.
+        </p>
+      </div>
       <FileUpload
         value={files}
         onValueChange={setFiles}
         maxFiles={10}
         maxSize={5 * 1024 * 1024}
         className="w-full max-w-md"
-        onUpload={onUpload}
         onFileReject={onFileReject}
         multiple
       >
@@ -111,26 +159,32 @@ function UploadPage() {
             </Button>
           </FileUploadTrigger>
         </FileUploadDropzone>
-        <FileUploadList orientation="horizontal">
+        <FileUploadList className="flex flex-col gap-2 w-full">
           {files.map((file, index) => (
-            <FileUploadItem key={index} value={file} className="p-0">
-              <FileUploadItemPreview className="size-20">
-                <FileUploadItemProgress variant="fill" />
-              </FileUploadItemPreview>
-              <FileUploadItemMetadata className="sr-only" />
+            <FileUploadItem
+              key={index}
+              value={file}
+              className="p-2 border rounded-lg flex justify-between items-center gap-2"
+            >
+              <span className="text-sm font-medium text-ellipsis overflow-hidden whitespace-nowrap">
+                {file.name}
+              </span>
               <FileUploadItemDelete asChild>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="-top-1 -right-1 absolute size-5 rounded-full"
-                >
-                  <X className="size-3" />
+                <Button variant="ghost" size="icon" className="size-8 shrink-0">
+                  <X className="size-4" />
                 </Button>
               </FileUploadItemDelete>
             </FileUploadItem>
           ))}
         </FileUploadList>
       </FileUpload>
+      <Button
+        size="lg"
+        onClick={handleProcessClick}
+        disabled={files.length === 0 || isLoading}
+      >
+        {isLoading ? "Processing..." : "Create Presentation"}
+      </Button>
     </div>
   );
 }
