@@ -56,43 +56,37 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted/50">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold ">PanicPrep</h1>
-          <Button variant="ghost" size="sm" onClick={handleLogout}>
-            <LogOut className="h-4 w-4 mr-2" />
-            Sign Out
-          </Button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 relative">
+      {/* Top Center Logo */}
+      <div className="text-center pt-8 pb-6">
+        <h1 className="text-3xl font-bold tracking-tight">PanicPrep</h1>
+      </div>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-16">
+      <main className="container mx-auto px-8 py-8 max-w-6xl">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold tracking-tight mb-4">
             How do you want to learn?
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Choose your preferred method to create an engaging presentation
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {/* Upload Option */}
           <Link href="/upload">
-            <div className="group h-full relative overflow-hidden rounded-xl border bg-background p-8 shadow-sm transition-all hover:shadow-lg hover:scale-[1.02]">
-              <div className="flex flex-col items-center text-center space-y-4">
+            <div className="group h-full relative overflow-hidden rounded-2xl border bg-background p-8 shadow-lg transition-all hover:shadow-xl hover:scale-[1.02] min-h-[280px]">
+              <div className="flex flex-col items-center text-center space-y-5">
                 <div className="rounded-full bg-primary/10 p-4 group-hover:bg-primary/20 transition-colors">
-                  <Upload className="h-8 w-8 text-primary" />
+                  <Upload className="h-10 w-10 text-primary" />
                 </div>
                 <h3 className="text-2xl font-semibold">Upload Materials</h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed text-base px-4">
                   Upload your notes, lecture slides, or course materials and
                   we'll create a presentation for you
                 </p>
-                <div className="text-sm text-primary font-medium">
+                <div className="text-sm text-primary font-medium mt-3">
                   Supports PDF →
                 </div>
               </div>
@@ -103,17 +97,17 @@ export default function Home() {
 
           {/* Prompt Option */}
           <Link href="/prompt">
-            <div className="group h-full relative overflow-hidden rounded-xl border bg-background p-8 shadow-sm transition-all hover:shadow-lg hover:scale-[1.02]">
-              <div className="flex flex-col items-center text-center space-y-4">
+            <div className="group h-full relative overflow-hidden rounded-2xl border bg-background p-8 shadow-lg transition-all hover:shadow-xl hover:scale-[1.02] min-h-[280px]">
+              <div className="flex flex-col items-center text-center space-y-5">
                 <div className="rounded-full bg-primary/10 p-4 group-hover:bg-primary/20 transition-colors">
-                  <Edit3 className="h-8 w-8 text-primary" />
+                  <Edit3 className="h-10 w-10 text-primary" />
                 </div>
                 <h3 className="text-2xl font-semibold">Enter Topics</h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed text-base px-4">
                   Simply enter a topic or list of topics and we'll research and
                   create a comprehensive presentation
                 </p>
-                <div className="text-sm text-primary font-medium">
+                <div className="text-sm text-primary font-medium mt-3">
                   AI-powered research and content →
                 </div>
               </div>
@@ -122,13 +116,25 @@ export default function Home() {
             </div>
           </Link>
         </div>
+
         {/* Footer */}
         <div className="text-center mt-16">
-          <p className="text-sm text-muted-foreground">
-            Learn in minutes, not hours
+          <p className="text-base text-muted-foreground">
+            Learn in minutes, not days!
           </p>
         </div>
       </main>
+
+      {/* Floating Logout Button */}
+      <Button
+        variant="outline"
+        size="lg"
+        onClick={handleLogout}
+        className="fixed bottom-8 right-8 rounded-full shadow-lg hover:shadow-xl transition-all bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-2"
+      >
+        <LogOut className="h-5 w-5 mr-2" />
+        Sign Out
+      </Button>
     </div>
   );
 }

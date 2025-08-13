@@ -25,6 +25,11 @@ export default function SetupPasswordPage() {
       if (!user) {
         router.push("/login");
       } else {
+        // If user already has a password set, redirect to home
+        if (user.user_metadata?.has_password) {
+          router.push("/");
+          return;
+        }
         setUser(user);
       }
     };
@@ -48,6 +53,9 @@ export default function SetupPasswordPage() {
 
     const { error } = await supabase.auth.updateUser({
       password: password,
+      data: {
+        has_password: true,
+      },
     });
 
     if (error) {
@@ -58,7 +66,7 @@ export default function SetupPasswordPage() {
       toast.success(
         "Password set successfully! You can now sign in with either method."
       );
-      router.push("/upload");
+      router.push("/");
     }
 
     setLoading(false);
@@ -113,7 +121,7 @@ export default function SetupPasswordPage() {
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => router.push("/upload")}
+          onClick={() => router.push("/")}
         >
           Skip for now
         </Button>

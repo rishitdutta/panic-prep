@@ -20,7 +20,9 @@ export async function GET(request: Request) {
 
       // If user signed in via magic link and doesn't have password set,
       // redirect to password setup (optional)
-      if (user && !user.user_metadata.has_password) {
+      // Users who have set up a password will have has_password metadata
+      // or will have signed in recently with password authentication
+      if (user && !user.user_metadata?.has_password) {
         return NextResponse.redirect(`${origin}/setup-password`);
       }
 
