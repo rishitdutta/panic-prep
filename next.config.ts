@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
         port: "8000",
         pathname: "/pngs/**",
       },
+      {
+        protocol: "https",
+        hostname: "panic-prep-backend.onrender.com",
+        pathname: "/pngs/**",
+      },
     ],
   },
 };

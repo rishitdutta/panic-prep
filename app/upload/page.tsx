@@ -82,23 +82,15 @@ function UploadPage() {
       if (!analyzeResponse.ok) throw new Error("Material analysis failed.");
       const { job_id, outline } = await analyzeResponse.json();
 
-      // --- Step 3: Build Presentation ---
-      toast.info("Step 3 of 3: Generating presentation...");
-      const buildResponse = await fetch(
-        `${apiUrl}/presentation/build_presentation`,
-        {
-          method: "POST",
-          headers: { ...authHeader, "Content-Type": "application/json" },
-          body: JSON.stringify({ job_id, outline, voice: "af_heart" }),
-        }
-      );
-      if (!buildResponse.ok) throw new Error("Presentation generation failed.");
-      const presentationResult = await buildResponse.json();
+      // --- Step 3: Navigate to Video Structure ---
+      toast.success("Outline generated successfully!");
 
-      // --- Final Step: Navigate to Video ---
-      toast.success("Presentation ready!");
-      localStorage.setItem("videoData", JSON.stringify(presentationResult));
-      router.push("/video");
+      // Pass the data to the video structure page
+      const queryParams = new URLSearchParams({
+        jobId: job_id,
+        outline: JSON.stringify(outline),
+      });
+      router.push(`/video-structure?${queryParams.toString()}`);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "An unknown error occurred";
